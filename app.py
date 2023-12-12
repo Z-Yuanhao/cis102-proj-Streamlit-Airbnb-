@@ -17,7 +17,7 @@ from streamlit_folium import folium_static
 
 
 ######################
-# Page Title
+st.header("Page Title")
 ######################
 
 # PIL.Image
