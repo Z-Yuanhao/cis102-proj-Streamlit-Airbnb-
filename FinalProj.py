@@ -28,16 +28,16 @@ select_borough = st.selectbox("Select Borough:", boroughs, 0)
 InBorough = data['neighbourhood_group'] == str(select_borough)
 ListHood = data[InBorough].reset_index(drop=True)
 HoodInBorough = ListHood['neighbourhood']
-sel_Hood = st.selectbox("Select Neighbourhood:", list(set(HoodInBorough)), 0)
+sel_Hood = st.multiselect("Select Neighbourhood(s):", list(set(HoodInBorough)), default=[list(set(HoodInBorough))[0]])
 #5.  [10pts] User should be able to set price range (on the main section instead of side menu)
 PriceRange = st.slider("Price range", float(data.price.min()), 1000., (50., 300.))
 #6.  [10pts] After all the previous selections user should see something like:
-HousingInHood = data['neighbourhood'] == str(sel_Hood)
+HousingInHood = data['neighbourhood'].isin(sel_Hood)
 ListHousingInHood = data[HousingInHood]
 
 PriceFilter = (ListHousingInHood['price'] >= PriceRange[0]) & (ListHousingInHood['price'] <= PriceRange[1])
 CountedBudgetHousing = ListHousingInHood[PriceFilter]
-st.write(f"Total {len(CountedBudgetHousing)} housing rental are found in {sel_Hood} {select_borough} with price between \${PriceRange[0]} and \${PriceRange[1]}")
+st.write(f"Total {len(CountedBudgetHousing)} housing rental are found in {', '.join(sel_Hood)} {select_borough} with price between \${PriceRange[0]} and \${PriceRange[1]}")
 #  Total 15 housing rental are found in Midtown Manhattan with price between $500 and $800
 #the total entries can be 0
 #7.  [20pts] At this step a map shows with available apartment/house as markers; when clicking on it it shows details including "name", host name, room type, neighborhood, Price will be showing as tool tip.
@@ -55,7 +55,7 @@ if len(CountedBudgetHousing) != 0:
       host_name = row['host_name']
       room_type = row['room_type']
       price = row['price']
-      tooltip = f"Name: {name}<br>Neighborhood: {neighborhood}<br>Host name: {host_name}<br>Room type: {room_type}<br>Price: ${price}"
+      tooltip = f"Name: {name}<br> Neighborhood: {neighborhood}<br> Host name: {host_name}<br> Room type: {room_type}<br> Price: ${price}"
       folium.Marker(
           location=[row['latitude'], row['longitude']],
           popup=tooltip
