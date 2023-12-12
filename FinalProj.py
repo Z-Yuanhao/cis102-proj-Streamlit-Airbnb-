@@ -2,18 +2,10 @@ import pandas as pd
 import streamlit as st
 from PIL import Image
 
-import math
-from datetime import datetime
-
 import pandas as pd
 
 import folium
 from streamlit_folium import folium_static
-
-import requests
-import json
-import folium
-
 
 #In this project you are going to use Airbnb NYC 2019 housing data to build a streamlit app with following requirements:
 @st.cache_data
@@ -34,7 +26,7 @@ boroughs = list(set(data['neighbourhood_group']))
 select_borough = st.selectbox("Select Borough:", boroughs, 0)
 # 4.  [20pts] User will then be able to select one or more of the neighborhoods (if Manhattan is selected then this multi-select drop down menu will have neighborhoods available in Mahanttan)
 InBorough = data['neighbourhood_group'] == str(select_borough)
-ListHood = data[InBorough]
+ListHood = data[InBorough].reset_index(drop=True)
 HoodInBorough = ListHood['neighbourhood']
 sel_Hood = st.selectbox("Select Neighbourhood:", list(set(HoodInBorough)), 0)
 #5.  [10pts] User should be able to set price range (on the main section instead of side menu)
@@ -54,20 +46,22 @@ st.write(f"Total {len(CountedBudgetHousing)} housing rental are found in {sel_Ho
 #       Host name: John
 #       Room type: Private room
 #       Tooltip: $1000
+if len(CountedBudgetHousing) != 0:
+  m = folium.Map(location=[CountedBudgetHousing['latitude'].iloc[0], CountedBudgetHousing['longitude'].iloc[0]], zoom_start=12)
 
-m = folium.Map(location=[CountedBudgetHousing['latitude'].iloc[0], CountedBudgetHousing['longitude'].iloc[0]], zoom_start=12)
-
-for index, row in CountedBudgetHousing.iterrows():
-    name = row['name']
-    neighborhood = row['neighbourhood']
-    host_name = row['host_name']
-    room_type = row['room_type']
-    price = row['price']
-    tooltip = f"Name: {name}<br>Neighborhood: {neighborhood}<br>Host name: {host_name}<br>Room type: {room_type}<br>Price: ${price}"
-    folium.Marker(
-        location=[row['latitude'], row['longitude']],
-        popup=tooltip
-    ).add_to(m)
+  for index, row in CountedBudgetHousing.iterrows():
+      name = row['name']
+      neighborhood = row['neighbourhood']
+      host_name = row['host_name']
+      room_type = row['room_type']
+      price = row['price']
+      tooltip = f"Name: {name}<br>Neighborhood: {neighborhood}<br>Host name: {host_name}<br>Room type: {room_type}<br>Price: ${price}"
+      folium.Marker(
+          location=[row['latitude'], row['longitude']],
+          popup=tooltip
+      ).add_to(m)
+else:
+  m = folium.Map(location=[ListHood.latitude[1],ListHood.longitude[1]],zoom_start=12)
 folium_static(m)
 
 #8.  [10pts] Finally you should upload your app to streamlit site.
